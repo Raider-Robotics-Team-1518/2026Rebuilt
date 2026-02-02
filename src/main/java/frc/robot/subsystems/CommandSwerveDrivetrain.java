@@ -11,7 +11,11 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import choreo.Choreo.TrajectoryLogger;
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -49,6 +53,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+    /* Swerve request to apply during field-centric path following */
+    private final SwerveRequest.ApplyFieldSpeeds m_pathApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+    private final PIDController m_pathXController = new PIDController(10,0,0);
+    private final PIDController m_pathYController = new PIDController(10,0,0);
+    private final PIDController m_pathThetaController = new PIDController(7,0,0);
+
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -299,5 +310,68 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+
+    /*
+     * Creates a new Choreo AutoFactory for this drivetrain
+     * 
+     * @return AutoFactory
+     */
+    public AutoFactory createAutoFactory() {
+        return createAutoFactory((sample, isStart) -> {});
+    }
+
+    /*
+     * Creates a new AutoFactory with the given trajectory logger
+     * 
+     * @param trajLogger Logger for this trajectory
+     * @return AutoFactory instance
+     */
+    public AutoFactory createAutoFactory(TrajectoryLogger<SwerveSample> trajLogger) {
+        return new AutoFactory(
+            this::getPose,
+            this::resetPose,
+            this::followPath,
+            true,
+            this,
+            trajLogger
+            );
+    }
+
+    /*
+     * Returns the robot's current pose from the drivetrain's state
+     */
+    public Pose2d getPose() {
+        Pose2d pose = getState().Pose;
+        return pose;
+    }
+
+
+    /*
+     * Follows the given field-centric path sample with PID
+     * 
+     * @param sample Sample along the path to follow
+     */
+    public void followPath(SwerveSample sample) {
+        m_pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
+        var pose = getState().Pose;
+        var targetSpeeds = sample.getChassisSpeeds();
+        targetSpeeds.vxMetersPerSecond += m_pathXController.calculate(
+            pose.getX(), sample.x
+        );
+
+        targetSpeeds.vyMetersPerSecond += m_pathYController.calculate(
+            pose.getY(), sample.y
+        );
+
+        targetSpeeds.omegaRadiansPerSecond += m_pathThetaController.calculate(
+            pose.getRotation().getRadians(), sample.heading
+        );
+
+        setControl(
+            m_pathApplyFieldSpeeds.withSpeeds(targetSpeeds)
+                .withWheelForceFeedforwardsX(sample.moduleForcesX())
+                .withWheelForceFeedforwardsY(sample.moduleForcesY())
+        );
     }
 }

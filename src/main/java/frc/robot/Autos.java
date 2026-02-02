@@ -32,8 +32,8 @@ public class Autos {
     private static final double kAutoAngularKi = 0.0;
     private static final double kAutoAngularKd = 0.0;
 
-    private final AutoFactory factory;
- 
+    private final AutoFactory autoFactory;
+
     public Autos(Robot robot) {
         drivetrain = robot.drivetrain;
         robotContainer = robot.m_robotContainer;
@@ -43,61 +43,41 @@ public class Autos {
         autoPIDangular = new PIDController(kAutoAngularKp, kAutoAngularKi, kAutoAngularKd);
         autoPIDangular.enableContinuousInput(-Math.PI, Math.PI);
 
-        // Create the auto factory - Need to look at how this needs to be implemented connecting CTRE with Choreo
-        factory = new AutoFactory(this::getPose, drivetrain::resetPose, drivetrain::setControl,
-                true, drivetrain);
+        // Create the auto factory - Need to look at how this needs to be implemented
+        // connecting CTRE with Choreo
+        autoFactory = drivetrain.createAutoFactory();
 
-    }       
+    }
 
     public Command example() {
-        AutoRoutine routine = factory.newRoutine("LeaveHome");
+        // create a new Routine with the name "LeaveHome" - which should match the
+        // trajectory you'll create next
+        AutoRoutine routine = autoFactory.newRoutine("LeaveHome");
+        // Read in the trajectory named "LeaveHome" - this has to be the case-sensitive
+        // name from Choreo
         AutoTrajectory exampleTraj = routine.trajectory("LeaveHome");
-        routine.active().onTrue(Commands.sequence(Commands.print("running example auto"), exampleTraj.resetOdometry(), Commands.print("Odometry Reset"), exampleTraj.cmd(), Commands.print("Trajectory Following")));
+        // when the routine is active (auto is enabled) run a sequence of commands - print a message, reset odometry,
+        // then drive our trajectory
+        routine.active().onTrue(Commands.sequence(Commands.print("running example auto"), exampleTraj.resetOdometry(),
+                exampleTraj.cmd()));
+        // finally, when that trajectory is done, stop the bot using the routine from Routines.java
         exampleTraj.done().onTrue(Commands.sequence(Commands.print("Auto Completed"), routines.stopBot()));
-
         return routine.cmd();
     }
 
-    private Pose2d getPose() {
-        Optional<Pose2d> current_pose = drivetrain.samplePoseAt(Instant.now().getEpochSecond());
-        if (!current_pose.isEmpty()) {
-            return current_pose.get();
-        }
-        return null;
-    }
-
-    /**
-     * Follows a Choreo trajectory by moving towards the next sample. This method
-     * is not intended for use outside of creating an {@link AutoFactory}.
-     *
-     * @param sample The next trajectory sample.
-     */
-    public void followTrajectory(SwerveSample sample) {
-        Pose2d pose = getPose();
-        Commands.print("vx" + sample.vx);
-        Commands.print("vy" + sample.vy);
-        Commands.print("x" + sample.x);
-        Commands.print("y" + sample.y);
-
-        robotContainer.drive
-                .withVelocityX(sample.vx + autoPIDx.calculate(pose.getX(), sample.x))
-                .withVelocityY(sample.vy + autoPIDy.calculate(pose.getY(), sample.y))
-                .withRotationalRate(
-                        sample.omega + autoPIDangular.calculate(pose.getRotation().getRadians(), sample.heading));
-
-    }
-    public void driveRobotCentric(SwerveSample sample) {
-        Pose2d pose = getPose();
-        Commands.print("vx" + sample.vx);
-        Commands.print("vy" + sample.vy);
-        Commands.print("x" + sample.x);
-        Commands.print("y" + sample.y);
-            drivetrain.applyRequest(() -> 
-                robotContainer.rcdrive
-                .withVelocityX(sample.vx + autoPIDx.calculate(pose.getX(), sample.x))
-                .withVelocityY(sample.vy + autoPIDy.calculate(pose.getY(), sample.y))
-                .withRotationalRate(
-                        sample.omega + autoPIDangular.calculate(pose.getRotation().getRadians(), sample.heading)));
-    }
+    // public void driveRobotCentric(SwerveSample sample) {
+    // Pose2d pose = drivetrain.getPose();
+    // Commands.print("vx" + sample.vx);
+    // Commands.print("vy" + sample.vy);
+    // Commands.print("x" + sample.x);
+    // Commands.print("y" + sample.y);
+    // drivetrain.applyRequest(() ->
+    // robotContainer.rcdrive
+    // .withVelocityX(sample.vx + autoPIDx.calculate(pose.getX(), sample.x))
+    // .withVelocityY(sample.vy + autoPIDy.calculate(pose.getY(), sample.y))
+    // .withRotationalRate(
+    // sample.omega + autoPIDangular.calculate(pose.getRotation().getRadians(),
+    // sample.heading)));
+    // }
 
 }
