@@ -17,9 +17,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeFuel;
+import frc.robot.commands.ShootFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shoot;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -44,9 +46,11 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public static Intake intakeSystem;
+    public static Shoot shootSystem;
 
     public RobotContainer() {
         intakeSystem = new Intake();
+        shootSystem = new Shoot();
         configureBindings();
     }
 
@@ -86,6 +90,9 @@ public class RobotContainer {
 
         // Intake
         joystick.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
+
+        //Shooter
+        joystick.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

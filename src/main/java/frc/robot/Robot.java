@@ -38,6 +38,7 @@ public class Robot extends TimedRobot {
         autos = new Autos(this);
 
         // add options to the dashboard
+        autoChooser.addOption("Drive8_Test", autos.Drive8_Test());
         autoChooser.addOption("LeaveHome", autos.example());
         autoChooser.addOption("Testing", null);
         SmartDashboard.putData("Select Auto", autoChooser);

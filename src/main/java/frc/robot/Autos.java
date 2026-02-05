@@ -65,6 +65,23 @@ public class Autos {
         return routine.cmd();
     }
 
+        public Command Drive8_Test() {
+        // create a new Routine with the name "Drive8_Test" - which should match the
+        // trajectory you'll create next
+        AutoRoutine routine = autoFactory.newRoutine("Drive8_Test");
+        // Read in the trajectory named "LeaveHome" - this has to be the case-sensitive
+        // name from Choreo
+        AutoTrajectory Drive8Traj = routine.trajectory("Drive8_Test");
+        // when the routine is active (auto is enabled) run a sequence of commands - print a message, reset odometry,
+        // then drive our trajectory
+        routine.active().onTrue(Commands.sequence(Commands.print("running Drive8_Test auto"), Drive8Traj.resetOdometry(),
+                Drive8Traj.cmd()));
+        // finally, when that trajectory is done, stop the bot using the routine from Routines.java
+        Drive8Traj.done().onTrue(Commands.sequence(Commands.print("Auto Completed"), routines.stopBot()));
+        return routine.cmd();
+    }
+
+
     // public void driveRobotCentric(SwerveSample sample) {
     // Pose2d pose = drivetrain.getPose();
     // Commands.print("vx" + sample.vx);
