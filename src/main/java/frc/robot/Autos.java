@@ -80,8 +80,37 @@ public class Autos {
         Drive8Traj.done().onTrue(Commands.sequence(Commands.print("Auto Completed"), routines.stopBot()));
         return routine.cmd();
     }
-
-
+   
+    public Command Test_45Command() {
+        // create a new Routine with the name "Drive8_Test" - which should match the
+        // trajectory you'll create next
+        AutoRoutine routine = autoFactory.newRoutine("Test_45");
+        // Read in the trajectory named "LeaveHome" - this has to be the case-sensitive
+        // name from Choreo
+        AutoTrajectory test_45Trajectory = routine.trajectory("Test_45");
+        // when the routine is active (auto is enabled) run a sequence of commands - print a message, reset odometry,
+        // then drive our trajectory
+        routine.active().onTrue(Commands.sequence(Commands.print("running Test_45"), test_45Trajectory.resetOdometry(),
+                test_45Trajectory.cmd()));
+        // finally, when that trajectory is done, stop the bot using the routine from Routines.java
+        test_45Trajectory.done().onTrue(Commands.sequence(Commands.print("Auto Completed"), routines.stopBot()));
+        return routine.cmd();
+    }
+    public Command ScorePre_GoDepotCommand() {
+        // create a new Routine with the name "Drive8_Test" - which should match the
+        // trajectory you'll create next
+        AutoRoutine routine = autoFactory.newRoutine("ScorePre_GoDepot");
+        // Read in the trajectory named "LeaveHome" - this has to be the case-sensitive
+        // name from Choreo
+        AutoTrajectory ScorePre_GoDepotTrajectory = routine.trajectory("ScorePre_GoDepot");
+        // when the routine is active (auto is enabled) run a sequence of commands - print a message, reset odometry,
+        // then drive our trajectory
+        routine.active().onTrue(Commands.sequence(Commands.print("running ScorePre_GoDepot"), ScorePre_GoDepotTrajectory.resetOdometry(),
+                ScorePre_GoDepotTrajectory.cmd()));
+        // finally, when that trajectory is done, stop the bot using the routine from Routines.java
+        ScorePre_GoDepotTrajectory.done().onTrue(Commands.sequence(Commands.print("Auto Completed"), routines.stopBot()));
+        return routine.cmd();
+    }
     // public void driveRobotCentric(SwerveSample sample) {
     // Pose2d pose = drivetrain.getPose();
     // Commands.print("vx" + sample.vx);

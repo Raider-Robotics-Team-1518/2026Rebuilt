@@ -40,7 +40,8 @@ public class Robot extends TimedRobot {
         // add options to the dashboard
         autoChooser.addOption("Drive8_Test", autos.Drive8_Test());
         autoChooser.addOption("LeaveHome", autos.example());
-        autoChooser.addOption("Testing", null);
+        autoChooser.addOption("Test_45", autos.Test_45Command());
+        autoChooser.addOption("ScorePre_GoDepot", autos.ScorePre_GoDepotCommand());
         SmartDashboard.putData("Select Auto", autoChooser);
     }
 
