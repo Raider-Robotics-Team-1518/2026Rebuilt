@@ -13,8 +13,10 @@ import edu.wpi.first.units.measure.Distance;
 /** Add your docs here. */
 public final class Constants {
     public enum turretStates {
-        DEFAULT, HOME, TRACKING, SEARCHING
+        DEFAULT, HOME, TRACKING, SEARCHING, MANUAL
     }
+
+    public static final double turretMotorDegreesPerRotation = 90;
 
     public static final class Motors {
         public static final int intakeNeoVortex = 24;

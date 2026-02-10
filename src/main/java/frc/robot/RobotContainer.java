@@ -24,10 +24,13 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shoot;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.TurretControl;
 
 public class RobotContainer {
-    private double MaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                         // speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
+                                                                                      // max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -50,12 +53,12 @@ public class RobotContainer {
 
     public static Intake intakeSystem;
     public static Shoot shootSystem;
-    public static TurretSubsystem turretSubsystem;
+    public static TurretControl turretSubsystem;
 
     public RobotContainer() {
         intakeSystem = new Intake();
         shootSystem = new Shoot();
-        turretSubsystem = new TurretSubsystem();
+        turretSubsystem = new TurretControl();
         configureBindings();
     }
 
@@ -63,25 +66,23 @@ public class RobotContainer {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with
+                                                                                                 // negative Y (forward)
+                        .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with
+                                                                                  // negative X (left)
+                ));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(
-            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
-        );
+                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
         driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driver.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))
-        ));
+        driver.b().whileTrue(drivetrain
+                .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -96,13 +97,35 @@ public class RobotContainer {
         // Intake
         driver.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
 
-        //Shooter
+        // Shooter
         driver.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
 
-        // codriver.leftTrigger().onTrue(new RotateTurret(codriver.getLeftTriggerAxis()*10)).onFalse(new RotateTurret(0));
-        // codriver.rightTrigger().onTrue(new RotateTurret(-codriver.getRightTriggerAxis()*10)).onFalse(new RotateTurret(0));
-        codriver.leftTrigger(0.1).whileTrue(Commands.startEnd(()-> turretSubsystem.setVelocity(-codriver.getLeftTriggerAxis()*10000), () -> turretSubsystem.setVelocity(0)));
-        codriver.rightTrigger(0.1).whileTrue(Commands.startEnd(()-> turretSubsystem.setVelocity(codriver.getRightTriggerAxis()*10000), () -> turretSubsystem.setVelocity(0)));
+        // THIS COMMENTED OUT CODE RELIES ON THE TurretSubsystem.java CLASS WHICH IS
+        // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS CODE
+        // codriver.leftTrigger().onTrue(new
+        // RotateTurret(codriver.getLeftTriggerAxis()*10)).onFalse(new RotateTurret(0));
+        // codriver.rightTrigger().onTrue(new
+        // RotateTurret(-codriver.getRightTriggerAxis()*10)).onFalse(new
+        // RotateTurret(0));
+        // codriver.leftTrigger(0.1).whileTrue(Commands.startEnd(()->
+        // turretSubsystem.setVelocity(-codriver.getLeftTriggerAxis()*10000), () ->
+        // turretSubsystem.setVelocity(0)));
+        // codriver.rightTrigger(0.1).whileTrue(Commands.startEnd(()->
+        // turretSubsystem.setVelocity(codriver.getRightTriggerAxis()*10000), () ->
+        // turretSubsystem.setVelocity(0)));
+        codriver.leftTrigger(0.1).whileTrue(
+                Commands.startEnd(() -> {
+                    turretSubsystem.setState(Constants.turretStates.MANUAL);
+                    turretSubsystem.driveTurret (-codriver.getLeftTriggerAxis());
+                },
+                () -> turretSubsystem.driveTurret(0)));
+
+        codriver.rightTrigger(0.1).whileTrue(
+                Commands.startEnd(() -> {
+                    turretSubsystem.setState(Constants.turretStates.MANUAL);
+                    turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
+                },
+                () -> turretSubsystem.driveTurret(0)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -111,18 +134,15 @@ public class RobotContainer {
         // Simple drive forward auton
         final var idle = new SwerveRequest.Idle();
         return Commands.sequence(
-            // Reset our field centric heading to match the robot
-            // facing away from our alliance station wall (0 deg).
-            drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-            // Then slowly drive forward (away from us) for 5 seconds.
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(0.5)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-            )
-            .withTimeout(5.0),
-            // Finally idle for the rest of auton
-            drivetrain.applyRequest(() -> idle)
-        );
+                // Reset our field centric heading to match the robot
+                // facing away from our alliance station wall (0 deg).
+                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
+                // Then slowly drive forward (away from us) for 5 seconds.
+                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
+                        .withVelocityY(0)
+                        .withRotationalRate(0))
+                        .withTimeout(5.0),
+                // Finally idle for the rest of auton
+                drivetrain.applyRequest(() -> idle));
     }
 }

@@ -28,9 +28,9 @@ public class RotateTurret extends Command {
   @Override
   public void execute() {
     if (Math.abs(speed) > 0) {
-      RobotContainer.turretSubsystem.setVelocity(speed);
+      RobotContainer.turretSubsystem.driveTurret(speed);
     } else {
-      RobotContainer.turretSubsystem.setVelocity(0);
+      RobotContainer.turretSubsystem.driveTurret(0);
       isDone = true;
     }
   }
@@ -38,7 +38,7 @@ public class RotateTurret extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.turretSubsystem.setVelocity(0);
+    RobotContainer.turretSubsystem.driveTurret(0);
   }
 
   // Returns true when the command should end.
