@@ -12,11 +12,17 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,7 +32,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Units.*;
 import frc.robot.LimelightHelpers;
-
+import frc.robot.Utils;
 import frc.robot.Constants;
 
 public class TurretControl extends SubsystemBase {
@@ -34,6 +40,17 @@ public class TurretControl extends SubsystemBase {
     private final SparkMax turretMotor;
     private final RelativeEncoder turretEncoder;
     SparkClosedLoopController m_controller;
+
+    private final double forwardSoftLimit = 2; // max angle in radians
+    private final double reverseSoftLimit = -2; // min angle in radians
+
+    private final double gearRatio = 90;
+    private final double kP = 1;
+    private final double kI = 0;
+    private final double kD = 0;
+
+    private final int[] redAprilTags = {2, 5, 8, 9, 10, 11};
+    private final int[] blueAprilTags = {18, 21, 24, 25, 26, 27};
 
     // This enum should be moved to its own class and imported
     // and used here so that it's easily available in the
@@ -47,8 +64,31 @@ public class TurretControl extends SubsystemBase {
     public TurretControl() {
         currentState = Constants.turretStates.DEFAULT;
         turretMotor = new SparkMax(Constants.Motors.turretMotorID, MotorType.kBrushless);
+        SparkMaxConfig motorConfig = new SparkMaxConfig();
+        motorConfig.idleMode(IdleMode.kBrake);
         turretEncoder = turretMotor.getAlternateEncoder();
         m_controller = turretMotor.getClosedLoopController();
+
+        motorConfig.softLimit
+            .forwardSoftLimit(forwardSoftLimit)
+            .forwardSoftLimitEnabled(true)
+            .reverseSoftLimit(reverseSoftLimit)
+            .reverseSoftLimitEnabled(true);
+
+        motorConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .pid(kP, kI, kD, ClosedLoopSlot.kSlot0);
+
+        // Configure Encoder Gear Ratio
+        motorConfig.encoder
+            .positionConversionFactor(1 / gearRatio)
+            .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
+
+        turretMotor.configure(
+            motorConfig,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
 
         // Reset encoder position to zero
         turretEncoder.setPosition(0);
@@ -63,6 +103,11 @@ public class TurretControl extends SubsystemBase {
          * LimelightHelpers.SetFiducialIDFiltersOverride("limelight", [1, 2, 3]);
          * We could switch based on the Alliance we're on
          */
+        if (Utils.isRed()) {
+            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", redAprilTags);
+        } else {
+            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", blueAprilTags);
+        }
 
         tx = Units.Degrees.of(LimelightHelpers.getTX("limelight"));
         ty = Units.Degrees.of(LimelightHelpers.getTY("limelight"));
@@ -174,7 +219,7 @@ public class TurretControl extends SubsystemBase {
     * @param speed Trigger input in range from +- 0 to 1
      */    
     public void driveTurret (double speed) {
-        int motorSpeed = (int) (11710 * 0.75 * speed);
+        int motorSpeed = (int) (Constants.Speeds.neoRPM * Constants.Speeds.turretMotorFactor * speed);
         m_controller.setSetpoint (motorSpeed, ControlType.kVelocity);
     }
 }

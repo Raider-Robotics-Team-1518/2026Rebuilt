@@ -28,6 +28,8 @@ public final class Constants {
     public static final class Speeds {
         public static final double intakeMotorSpeed = 0.5;
         public static final double shootMotorSpeed = 85;  //Initial testing 85 to 100 is fairly consistent
+        public static final double neoRPM = 11710;
+        public static final double turretMotorFactor = 0.75;
     }
 
     public static final class Dimensions {
