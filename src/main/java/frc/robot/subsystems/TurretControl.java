@@ -202,7 +202,7 @@ public class TurretControl extends SubsystemBase {
 
         double finalVelocity = searchDirectionRight ? searchSpeed : -searchSpeed;
         m_controller.setSetpoint(finalVelocity, ControlType.kVelocity);
-                                                                                                         // deg/sec
+                                                                                    // deg/sec
     }
 
     public void goHome() {

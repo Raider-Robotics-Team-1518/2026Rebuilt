@@ -4,35 +4,59 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Shoot extends SubsystemBase {
   /** Creates a new Shoot. */
-  private TalonFX shootMotor;
+  //private TalonFX shootMotor;
   private double velocity = 0;
 
-  public Shoot() {
-    shootMotor = new TalonFX(Constants.Motors.shootTalonFX);
-    shootMotor.setNeutralMode(NeutralModeValue.Coast);
+  final SparkMax shootMotor = new SparkMax(Constants.Motors.shootNeoVortex, MotorType.kBrushless);
+  SparkBaseConfig shootMotorConfig;
 
-    var slot0Configs = new Slot0Configs();
-      slot0Configs.kP = 0.2;
-      slot0Configs.kI = 0.0;
-      slot0Configs.kD = 0.01;
-      shootMotor.getConfigurator().apply(slot0Configs);
+  private final double kP = 1;
+  private final double kI = 0;
+  private final double kD = 0;
+
+  SparkClosedLoopController m_controller;
+
+  public Shoot() {
+    //shootMotor = new TalonFX(Constants.Motors.shootTalonFX);
+    //shootMotor.setNeutralMode(NeutralModeValue.Coast);
+    shootMotorConfig = new SparkMaxConfig();
+    shootMotorConfig.idleMode(IdleMode.kCoast);
+    shootMotorConfig.inverted(false);
+    m_controller = shootMotor.getClosedLoopController();
+
+    shootMotorConfig.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .pid(kP, kI, kD, ClosedLoopSlot.kSlot0);
+
+    shootMotor.configure(shootMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
-  public void setShooterSpeed(double shooterVelocity) {
+  public void setShooterSpeed(int shooterVelocity) {
     velocity = shooterVelocity;
-    VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
-    shootMotor.setControl(velocityControl.withVelocity(velocity));
+    //VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
+    m_controller.setSetpoint (shooterVelocity, ControlType.kVelocity);
   }
 
   public void stopShooter() {
