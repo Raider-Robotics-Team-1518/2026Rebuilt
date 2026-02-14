@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeFuel;
+import frc.robot.commands.KickFuel;
 import frc.robot.commands.RotateTurret;
 import frc.robot.commands.ShootFuel;
 import frc.robot.generated.TunerConstants;
@@ -80,9 +81,9 @@ public class RobotContainer {
         RobotModeTriggers.disabled().whileTrue(
                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-        driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driver.b().whileTrue(drivetrain
-                .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+        // driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // driver.b().whileTrue(drivetrain
+        //         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
         // Reset the field-centric heading on left bumper press.
         driver.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
@@ -91,10 +92,18 @@ public class RobotContainer {
         driver.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
 
         // Shooter
-        driver.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
+        
+        driver.y()
+                .whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed, Constants.Speeds.kickMotorSpeed))
+                // ,                        new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                .onFalse(new ShootFuel(0, 0)); //, new KickFuel(0)));
 
+        /*driver.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
+        driver.a().whileTrue(new KickFuel(Constants.Speeds.kickMotorSpeed)).onFalse(new KickFuel(0));
+        */
         // THIS COMMENTED OUT CODE RELIES ON THE TurretSubsystem.java CLASS WHICH IS
-        // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS CODE
+        // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS
+        // CODE
         // codriver.leftTrigger().onTrue(new
         // RotateTurret(codriver.getLeftTriggerAxis()*10)).onFalse(new RotateTurret(0));
         // codriver.rightTrigger().onTrue(new
@@ -109,16 +118,16 @@ public class RobotContainer {
         codriver.leftTrigger(0.1).whileTrue(
                 Commands.startEnd(() -> {
                     turretSubsystem.setState(Constants.turretStates.MANUAL);
-                    turretSubsystem.driveTurret (-codriver.getLeftTriggerAxis());
+                    turretSubsystem.driveTurret(-codriver.getLeftTriggerAxis());
                 },
-                () -> turretSubsystem.driveTurret(0)));
+                        () -> turretSubsystem.driveTurret(0)));
 
         codriver.rightTrigger(0.1).whileTrue(
                 Commands.startEnd(() -> {
                     turretSubsystem.setState(Constants.turretStates.MANUAL);
                     turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
                 },
-                () -> turretSubsystem.driveTurret(0)));
+                        () -> turretSubsystem.driveTurret(0)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

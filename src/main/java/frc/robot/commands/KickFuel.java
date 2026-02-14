@@ -4,21 +4,18 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ShootFuel extends Command {
-  /** Creates a new ShootFuel. */
-
-  private int shootSpeed, kickSpeed = 0;
+public class KickFuel extends Command {
+  /** Creates a new KickFuel. */
+  private int kickSpeed = 0;
   private boolean isDone = false;
 
-  public ShootFuel(int shootSpeed, int kickSpeed) {
+  public KickFuel(int kickSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.shootSystem);
-    this.shootSpeed = shootSpeed;
     this.kickSpeed = kickSpeed;
   }
 
@@ -29,22 +26,19 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Math.abs(shootSpeed) > 0) {
-      RobotContainer.shootSystem.setShooterSpeed(shootSpeed);
+    if (Math.abs(kickSpeed) > 0) {
       RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
     } else {
-      RobotContainer.shootSystem.stopShooter();
       RobotContainer.shootSystem.stopKicker();
       isDone = true;
     }
   }
+  
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.shootSystem.stopShooter();
     RobotContainer.shootSystem.stopKicker();
-
   }
 
   // Returns true when the command should end.

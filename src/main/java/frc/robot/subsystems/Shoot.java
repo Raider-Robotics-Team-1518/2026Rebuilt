@@ -27,16 +27,28 @@ import frc.robot.Constants;
 public class Shoot extends SubsystemBase {
   /** Creates a new Shoot. */
   //private TalonFX shootMotor;
-  private double velocity = 0;
+  private double shoot_velocity = 0;
 
   final SparkMax shootMotor = new SparkMax(Constants.Motors.shootNeoVortex, MotorType.kBrushless);
   SparkBaseConfig shootMotorConfig;
 
-  private final double kP = 1;
-  private final double kI = 0;
-  private final double kD = 0;
+  private final double kPshoot = 0.002;
+  private final double kIshoot = 0;
+  private final double kDshoot = 0;
 
   SparkClosedLoopController m_controller;
+
+  // kick motor
+  private double kick_velocity = 0;
+
+  final SparkMax kickerMotor = new SparkMax(Constants.Motors.kickerMotorID, MotorType.kBrushless);
+  SparkBaseConfig kickerMotorConfig;
+
+  private final double kPkick = 0.002;
+  private final double kIkick = 0;
+  private final double kDkick = 0;
+
+  SparkClosedLoopController m_kicker_controller;
 
   public Shoot() {
     //shootMotor = new TalonFX(Constants.Motors.shootTalonFX);
@@ -48,24 +60,48 @@ public class Shoot extends SubsystemBase {
 
     shootMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .pid(kP, kI, kD, ClosedLoopSlot.kSlot0);
+      .pid(kPshoot, kIshoot, kDshoot, ClosedLoopSlot.kSlot0);
 
     shootMotor.configure(shootMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    kickerMotorConfig = new SparkMaxConfig();
+    kickerMotorConfig.idleMode(IdleMode.kBrake);
+    kickerMotorConfig.inverted(false);
+    m_kicker_controller = kickerMotor.getClosedLoopController();
+
+    kickerMotorConfig.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .pid(kPkick, kIkick, kDkick, ClosedLoopSlot.kSlot0);
+
+    kickerMotor.configure(kickerMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   public void setShooterSpeed(int shooterVelocity) {
-    velocity = shooterVelocity;
+    shoot_velocity = shooterVelocity;
     //VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
-    m_controller.setSetpoint (shooterVelocity, ControlType.kVelocity);
+    //m_controller.setSetpoint(shooterVelocity, ControlType.kVelocity);
+    shootMotor.set(shooterVelocity/10);
+  }
+
+  public void setKickerSpeed(int kickerVelocity) {
+    kick_velocity = kickerVelocity;
+    //VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
+    //m_kicker_controller.setSetpoint (kickerVelocity, ControlType.kVelocity);
+    kickerMotor.set(kickerVelocity/10);
   }
 
   public void stopShooter() {
     shootMotor.stopMotor();
   }
 
+  public void stopKicker() {
+    kickerMotor.stopMotor();
+  }
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("ShooterRPM", velocity);
+    SmartDashboard.putNumber("ShooterRPM", shoot_velocity);
+    SmartDashboard.putNumber("KickerRPM", kick_velocity);
   }
 }

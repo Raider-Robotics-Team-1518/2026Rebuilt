@@ -24,11 +24,13 @@ public final class Constants {
         //public static final int shootTalonFX = 25;
         public static final int turretMotorID = 26;
         public static final int turretEncoderID = 27;
+        public static final int kickerMotorID = 28;
     }
 
     public static final class Speeds {
         public static final double intakeMotorSpeed = 0.5;
         public static final int shootMotorSpeed = 85;  //Initial testing 85 to 100 is fairly consistent
+        public static final int kickMotorSpeed = -50;  //Need to dial this in - very noisy
         public static final double neoRPM = 11710;
         public static final double turretMotorFactor = 0.75;
     }

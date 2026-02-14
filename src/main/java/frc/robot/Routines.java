@@ -27,7 +27,7 @@ public class Routines {
     }
 
     public Command timedShoot() {
-        return Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed).withTimeout(5),
-        new ShootFuel(0));
+        return Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed, 0).withTimeout(5),
+        new ShootFuel(0, 0));
     }
 }
