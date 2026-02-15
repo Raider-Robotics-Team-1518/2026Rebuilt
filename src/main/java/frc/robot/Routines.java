@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.commands.KickFuel;
 import frc.robot.commands.ShootFuel;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -27,7 +28,8 @@ public class Routines {
     }
 
     public Command timedShoot() {
-        return Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed, 0).withTimeout(5),
-        new ShootFuel(0, 0));
+        return Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed), 
+        Commands.waitSeconds(0.5), new KickFuel(Constants.Speeds.kickMotorSpeed), 
+        Commands.waitSeconds(3), new KickFuel(0), new ShootFuel(0));
     }
 }

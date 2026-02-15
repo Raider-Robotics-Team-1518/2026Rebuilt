@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 
@@ -12,14 +11,14 @@ import frc.robot.RobotContainer;
 public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
 
-  private int shootSpeed, kickSpeed = 0;
+  private int shootSpeed = 0;
   private boolean isDone = false;
 
-  public ShootFuel(int shootSpeed, int kickSpeed) {
+  public ShootFuel(int shootSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.shootSystem);
     this.shootSpeed = shootSpeed;
-    this.kickSpeed = kickSpeed;
+    //this.kickSpeed = kickSpeed;
   }
 
   // Called when the command is initially scheduled.
@@ -31,19 +30,19 @@ public class ShootFuel extends Command {
   public void execute() {
     if (Math.abs(shootSpeed) > 0) {
       RobotContainer.shootSystem.setShooterSpeed(shootSpeed);
-      RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
+      //RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
     } else {
       RobotContainer.shootSystem.stopShooter();
-      RobotContainer.shootSystem.stopKicker();
-      isDone = true;
+      //RobotContainer.shootSystem.stopKicker();
     }
+    isDone = true;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     RobotContainer.shootSystem.stopShooter();
-    RobotContainer.shootSystem.stopKicker();
+    //RobotContainer.shootSystem.stopKicker();
 
   }
 

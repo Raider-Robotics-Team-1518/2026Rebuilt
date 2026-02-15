@@ -16,7 +16,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class Intake extends SubsystemBase {
-  final SparkMax intakeMotor = new SparkMax(Constants.Motors.intakeNeoVortex, MotorType.kBrushless);
+  final SparkMax intakeMotor = new SparkMax(Constants.Motors.intakeMotorID, MotorType.kBrushless);
   SparkBaseConfig intakeMotorConfig;
   /** Creates a new Intake. */
   public Intake() {

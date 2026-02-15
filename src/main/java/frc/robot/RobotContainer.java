@@ -94,9 +94,8 @@ public class RobotContainer {
         // Shooter
         
         driver.y()
-                .whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed, Constants.Speeds.kickMotorSpeed))
-                // ,                        new KickFuel(Constants.Speeds.kickMotorSpeed)))
-                .onFalse(new ShootFuel(0, 0)); //, new KickFuel(0)));
+                .whileTrue(Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed), Commands.waitSeconds(0.5), new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0))); 
 
         /*driver.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
         driver.a().whileTrue(new KickFuel(Constants.Speeds.kickMotorSpeed)).onFalse(new KickFuel(0));

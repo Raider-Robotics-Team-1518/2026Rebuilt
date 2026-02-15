@@ -26,76 +26,65 @@ import frc.robot.Constants;
 
 public class Shoot extends SubsystemBase {
   /** Creates a new Shoot. */
-  //private TalonFX shootMotor;
   private double shoot_velocity = 0;
-
-  final SparkMax shootMotor = new SparkMax(Constants.Motors.shootNeoVortex, MotorType.kBrushless);
-  SparkBaseConfig shootMotorConfig;
-
+  private final SparkMax shootMotor = new SparkMax(Constants.Motors.shootMotorID, MotorType.kBrushless);
+  private final SparkBaseConfig shootMotorConfig;
+  private final SparkClosedLoopController m_shoot_controller;
   private final double kPshoot = 0.002;
   private final double kIshoot = 0;
   private final double kDshoot = 0;
+  private final double kFshoot = 0;
 
-  SparkClosedLoopController m_controller;
 
   // kick motor
   private double kick_velocity = 0;
-
-  final SparkMax kickerMotor = new SparkMax(Constants.Motors.kickerMotorID, MotorType.kBrushless);
-  SparkBaseConfig kickerMotorConfig;
-
+  private final SparkMax kickerMotor = new SparkMax(Constants.Motors.kickerMotorID, MotorType.kBrushless);
+  private final SparkBaseConfig kickerMotorConfig;
+  private final SparkClosedLoopController m_kicker_controller;
   private final double kPkick = 0.002;
   private final double kIkick = 0;
   private final double kDkick = 0;
+  private final double kFkick = 0;
 
-  SparkClosedLoopController m_kicker_controller;
 
   public Shoot() {
-    //shootMotor = new TalonFX(Constants.Motors.shootTalonFX);
-    //shootMotor.setNeutralMode(NeutralModeValue.Coast);
     shootMotorConfig = new SparkMaxConfig();
     shootMotorConfig.idleMode(IdleMode.kCoast);
     shootMotorConfig.inverted(false);
-    m_controller = shootMotor.getClosedLoopController();
-
     shootMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pid(kPshoot, kIshoot, kDshoot, ClosedLoopSlot.kSlot0);
-
     shootMotor.configure(shootMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_shoot_controller = shootMotor.getClosedLoopController();
 
     kickerMotorConfig = new SparkMaxConfig();
     kickerMotorConfig.idleMode(IdleMode.kBrake);
-    kickerMotorConfig.inverted(false);
-    m_kicker_controller = kickerMotor.getClosedLoopController();
-
+    kickerMotorConfig.inverted(true);
     kickerMotorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pid(kPkick, kIkick, kDkick, ClosedLoopSlot.kSlot0);
-
     kickerMotor.configure(kickerMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_kicker_controller = kickerMotor.getClosedLoopController();
   }
 
   public void setShooterSpeed(int shooterVelocity) {
     shoot_velocity = shooterVelocity;
-    //VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
-    //m_controller.setSetpoint(shooterVelocity, ControlType.kVelocity);
-    shootMotor.set(shooterVelocity/10);
+    m_shoot_controller.setSetpoint(shoot_velocity, ControlType.kVelocity);
+    //shootMotor.set(shoot_velocity);
   }
 
   public void setKickerSpeed(int kickerVelocity) {
     kick_velocity = kickerVelocity;
-    //VelocityVoltage velocityControl = new VelocityVoltage(velocity).withSlot(0);
-    //m_kicker_controller.setSetpoint (kickerVelocity, ControlType.kVelocity);
-    kickerMotor.set(kickerVelocity/10);
+    m_kicker_controller.setSetpoint(kick_velocity, ControlType.kVelocity);
+    //kickerMotor.set(kickerVelocity/10);
   }
 
   public void stopShooter() {
-    shootMotor.stopMotor();
+    m_shoot_controller.setSetpoint(0, ControlType.kVelocity);
   }
 
   public void stopKicker() {
-    kickerMotor.stopMotor();
+    m_kicker_controller.setSetpoint(0, ControlType.kVelocity);
   }
   
   @Override

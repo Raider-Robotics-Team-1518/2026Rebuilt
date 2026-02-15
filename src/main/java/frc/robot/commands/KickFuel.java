@@ -30,8 +30,8 @@ public class KickFuel extends Command {
       RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
     } else {
       RobotContainer.shootSystem.stopKicker();
-      isDone = true;
     }
+    isDone = true;
   }
   
 
