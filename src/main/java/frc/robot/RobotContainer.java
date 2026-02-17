@@ -28,122 +28,140 @@ import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretControl;
 
 public class RobotContainer {
-    private double MaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                         // speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-                                                                                      // max angular velocity
+        private double MaxSpeed = 0.75 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
+                                                                                             // top
+                                                                                             // speed
+        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+                                                                                          // second
+                                                                                          // max angular velocity
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+        /* Setting up bindings for necessary control of the swerve drive platform */
+        public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+                                                                                 // motors
 
-    public final SwerveRequest.RobotCentric rcdrive = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+        public final SwerveRequest.RobotCentric rcdrive = new SwerveRequest.RobotCentric()
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+                                                                                 // motors
 
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+        private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+        private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController driver = new CommandXboxController(0);
-    private final CommandXboxController codriver = new CommandXboxController(1);
+        private final CommandXboxController driver = new CommandXboxController(0);
+        private final CommandXboxController codriver = new CommandXboxController(1);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public static Intake intakeSystem;
-    public static Shoot shootSystem;
-    public static TurretControl turretSubsystem;
+        public static Intake intakeSystem;
+        public static Shoot shootSystem;
+        public static TurretControl turretSubsystem;
 
-    public RobotContainer() {
-        intakeSystem = new Intake();
-        shootSystem = new Shoot();
-        turretSubsystem = new TurretControl();
-        configureBindings();
-    }
+        public RobotContainer() {
+                intakeSystem = new Intake();
+                shootSystem = new Shoot();
+                turretSubsystem = new TurretControl();
+                configureBindings();
+        }
 
-    private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                                 // negative Y (forward)
-                        .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with
-                                                                                  // negative X (left)
-                ));
+        private void configureBindings() {
+                // Note that X is defined as forward according to WPILib convention,
+                // and Y is defined as to the left according to WPILib convention.
+                drivetrain.setDefaultCommand(
+                                // Drivetrain will execute this command periodically
+                                drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive
+                                                                                                                 // forward
+                                                                                                                 // with
+                                                                                                                 // negative
+                                                                                                                 // Y
+                                                                                                                 // (forward)
+                                                .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with
+                                                                                              // negative X (left)
+                                                .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive
+                                                                                                          // counterclockwise
+                                                                                                          // with
+                                                                                                          // negative X
+                                                                                                          // (left)
+                                ));
 
-        // Idle while the robot is disabled. This ensures the configured
-        // neutral mode is applied to the drive motors while disabled.
-        final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(
-                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
+                // Idle while the robot is disabled. This ensures the configured
+                // neutral mode is applied to the drive motors while disabled.
+                final var idle = new SwerveRequest.Idle();
+                RobotModeTriggers.disabled().whileTrue(
+                                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-        // driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        // driver.b().whileTrue(drivetrain
-        //         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+                // driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
+                // driver.b().whileTrue(drivetrain
+                // .applyRequest(() -> point.withModuleDirection(new
+                // Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
-        // Reset the field-centric heading on left bumper press.
-        driver.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+                // Reset the field-centric heading on left bumper press.
+                driver.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        // Intake
-        driver.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
+                // Intake
+                driver.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
 
-        // Shooter
-        
-        driver.y()
-                .whileTrue(Commands.sequence(new ShootFuel(Constants.Speeds.shootMotorSpeed), Commands.waitSeconds(0.5), new KickFuel(Constants.Speeds.kickMotorSpeed)))
-                .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0))); 
+                // Shooter
 
-        /*driver.y().whileTrue(new ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
-        driver.a().whileTrue(new KickFuel(Constants.Speeds.kickMotorSpeed)).onFalse(new KickFuel(0));
-        */
-        // THIS COMMENTED OUT CODE RELIES ON THE TurretSubsystem.java CLASS WHICH IS
-        // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS
-        // CODE
-        // codriver.leftTrigger().onTrue(new
-        // RotateTurret(codriver.getLeftTriggerAxis()*10)).onFalse(new RotateTurret(0));
-        // codriver.rightTrigger().onTrue(new
-        // RotateTurret(-codriver.getRightTriggerAxis()*10)).onFalse(new
-        // RotateTurret(0));
-        // codriver.leftTrigger(0.1).whileTrue(Commands.startEnd(()->
-        // turretSubsystem.setVelocity(-codriver.getLeftTriggerAxis()*10000), () ->
-        // turretSubsystem.setVelocity(0)));
-        // codriver.rightTrigger(0.1).whileTrue(Commands.startEnd(()->
-        // turretSubsystem.setVelocity(codriver.getRightTriggerAxis()*10000), () ->
-        // turretSubsystem.setVelocity(0)));
-        codriver.leftTrigger(0.1).whileTrue(
-                Commands.startEnd(() -> {
-                    turretSubsystem.setState(Constants.turretStates.MANUAL);
-                    turretSubsystem.driveTurret(-codriver.getLeftTriggerAxis());
-                },
-                        () -> turretSubsystem.driveTurret(0)));
+                driver.y().onTrue(Commands.sequence(
+                        new ShootFuel(Constants.Speeds.shootMotorSpeed),
+                        Commands.waitSeconds(0.5),
+                        new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                        .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0)));
 
-        codriver.rightTrigger(0.1).whileTrue(
-                Commands.startEnd(() -> {
-                    turretSubsystem.setState(Constants.turretStates.MANUAL);
-                    turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
-                },
-                        () -> turretSubsystem.driveTurret(0)));
+                /*
+                 * driver.y().whileTrue(new
+                 * ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
+                 * driver.a().whileTrue(new
+                 * KickFuel(Constants.Speeds.kickMotorSpeed)).onFalse(new KickFuel(0));
+                 */
+                // THIS COMMENTED OUT CODE RELIES ON THE TurretSubsystem.java CLASS WHICH IS
+                // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS
+                // CODE
+                // codriver.leftTrigger().onTrue(new
+                // RotateTurret(codriver.getLeftTriggerAxis()*10)).onFalse(new RotateTurret(0));
+                // codriver.rightTrigger().onTrue(new
+                // RotateTurret(-codriver.getRightTriggerAxis()*10)).onFalse(new
+                // RotateTurret(0));
+                // codriver.leftTrigger(0.1).whileTrue(Commands.startEnd(()->
+                // turretSubsystem.setVelocity(-codriver.getLeftTriggerAxis()*10000), () ->
+                // turretSubsystem.setVelocity(0)));
+                // codriver.rightTrigger(0.1).whileTrue(Commands.startEnd(()->
+                // turretSubsystem.setVelocity(codriver.getRightTriggerAxis()*10000), () ->
+                // turretSubsystem.setVelocity(0)));
+                codriver.leftTrigger(0.1).whileTrue(
+                                Commands.startEnd(() -> {
+                                        turretSubsystem.setState(Constants.turretStates.MANUAL);
+                                        turretSubsystem.driveTurret(-codriver.getLeftTriggerAxis());
+                                },
+                                                () -> turretSubsystem.driveTurret(0)));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
-    }
+                codriver.rightTrigger(0.1).whileTrue(
+                                Commands.startEnd(() -> {
+                                        turretSubsystem.setState(Constants.turretStates.MANUAL);
+                                        turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
+                                },
+                                                () -> turretSubsystem.driveTurret(0)));
 
-    public Command getAutonomousCommand() {
-        // Simple drive forward auton
-        final var idle = new SwerveRequest.Idle();
-        return Commands.sequence(
-                // Reset our field centric heading to match the robot
-                // facing away from our alliance station wall (0 deg).
-                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-                // Then slowly drive forward (away from us) for 5 seconds.
-                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
-                        .withVelocityY(0)
-                        .withRotationalRate(0))
-                        .withTimeout(5.0),
-                // Finally idle for the rest of auton
-                drivetrain.applyRequest(() -> idle));
-    }
+                drivetrain.registerTelemetry(logger::telemeterize);
+        }
+
+        public Command getAutonomousCommand() {
+                // Simple drive forward auton
+                final var idle = new SwerveRequest.Idle();
+                return Commands.sequence(
+                                // Reset our field centric heading to match the robot
+                                // facing away from our alliance station wall (0 deg).
+                                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
+                                // Then slowly drive forward (away from us) for 5 seconds.
+                                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
+                                                .withVelocityY(0)
+                                                .withRotationalRate(0))
+                                                .withTimeout(5.0),
+                                // Finally idle for the rest of auton
+                                drivetrain.applyRequest(() -> idle));
+        }
 }
