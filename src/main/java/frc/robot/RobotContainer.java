@@ -60,6 +60,8 @@ public class RobotContainer {
         public static Shoot shootSystem;
         public static TurretControl turretSubsystem;
 
+        private boolean isTurretTracking = true;
+
         public RobotContainer() {
                 intakeSystem = new Intake();
                 shootSystem = new Shoot();
@@ -145,6 +147,17 @@ public class RobotContainer {
                                         turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
                                 },
                                                 () -> turretSubsystem.driveTurret(0)));
+                codriver.b().onTrue(Commands.runOnce(() -> {
+                        if (isTurretTracking) {
+                                turretSubsystem.setState(Constants.turretStates.MANUAL);
+                                isTurretTracking = false;
+                        } else {
+                                turretSubsystem.setState(Constants.turretStates.TRACKING);
+                                isTurretTracking = true;
+                        }
+                })
+                );
+
 
                 drivetrain.registerTelemetry(logger::telemeterize);
         }

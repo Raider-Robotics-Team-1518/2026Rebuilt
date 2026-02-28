@@ -80,13 +80,13 @@ public class Shoot extends SubsystemBase {
 
   public void setShooterSpeed(int shooterVelocity) {
     shoot_velocity = shooterVelocity;
-    m_shoot_controller.setSetpoint(4000, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+    m_shoot_controller.setSetpoint(Constants.Speeds.shootMotorSpeed, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     // shootMotor.set(shoot_velocity/100);
   }
 
   public void setKickerSpeed(int kickerVelocity) {
     kick_velocity = kickerVelocity;
-    m_kicker_controller.setSetpoint(2500, ControlType.kVelocity);
+    m_kicker_controller.setSetpoint(Constants.Speeds.kickMotorSpeed, ControlType.kVelocity);
     // kickerMotor.set(kick_velocity/100);
   }
 
