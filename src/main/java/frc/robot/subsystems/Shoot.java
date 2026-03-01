@@ -4,10 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -17,8 +13,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.FeedForwardConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -40,7 +34,6 @@ public class Shoot extends SubsystemBase {
 
 
   // kick motor
-  private double kick_velocity = 0;
   private final SparkMax kickerMotor;
   private final SparkMaxConfig kickerMotorConfig;
   private final SparkClosedLoopController m_kicker_controller;
@@ -79,24 +72,19 @@ public class Shoot extends SubsystemBase {
   }
 
   public void setShooterSpeed(int shooterVelocity) {
-    shoot_velocity = shooterVelocity;
-    m_shoot_controller.setSetpoint(Constants.Speeds.shootMotorSpeed, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
-    // shootMotor.set(shoot_velocity/100);
+    shoot_velocity = shooterVelocity; // in RPMs
+    m_shoot_controller.setSetpoint(shoot_velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
   }
 
   public void setKickerSpeed(int kickerVelocity) {
-    kick_velocity = kickerVelocity;
     m_kicker_controller.setSetpoint(Constants.Speeds.kickMotorSpeed, ControlType.kVelocity);
-    // kickerMotor.set(kick_velocity/100);
   }
 
   public void stopShooter() {
-    // m_shoot_controller.setSetpoint(0, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     shootMotor.stopMotor();
   }
 
   public void stopKicker() {
-    // m_kicker_controller.setSetpoint(0, ControlType.kVelocity);
     kickerMotor.stopMotor();
   }
   

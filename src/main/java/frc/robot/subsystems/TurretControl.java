@@ -2,16 +2,6 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Rotations;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -30,12 +20,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.Units.*;
 import frc.robot.LimelightHelpers;
 import frc.robot.Utils;
 import frc.robot.Constants;
 
 public class TurretControl extends SubsystemBase {
+
+    // these are the AprilTags on the hubs that we'll target; we'll ignore any others when shooting
+    private final int[] redAprilTags = {2, 5, 8, 9, 10, 11};
+    private final int[] blueAprilTags = {18, 21, 24, 25, 26, 27};
 
     private final SparkMax turretMotor;
     private final RelativeEncoder turretEncoder;
@@ -48,9 +41,6 @@ public class TurretControl extends SubsystemBase {
     private final double kP = 1;
     private final double kI = 0;
     private final double kD = 0;
-
-    private final int[] redAprilTags = {2, 5, 8, 9, 10, 11};
-    private final int[] blueAprilTags = {18, 21, 24, 25, 26, 27};
 
     // This enum should be moved to its own class and imported
     // and used here so that it's easily available in the
@@ -133,7 +123,7 @@ public class TurretControl extends SubsystemBase {
                 break;
             case MANUAL:
             // Do nothing here, we'll be calling setVelocity from RobotContainer
-            // when in MANUAl mode
+            // when in MANUAL mode
                 break;
             default:
                 stopMotor();
@@ -146,18 +136,17 @@ public class TurretControl extends SubsystemBase {
         return new InstantCommand(() -> currentState = state, this);
     }
 
-    private Distance getDistance() {
-        // TARGET_HEIGHT needs to be defined as a Distance (in Inch)
-        // Distance TARGET_HEIGHT = Distance.ofBaseUnits(36, Inch)
-        Distance opposite = Constants.Dimensions.targetHeight.minus(Constants.Dimensions.limelightHeight);
-        // ty is from the limelight helper getTy()
-        // import edu.wpi.first.units.measure.Angle;
-        // import edu.wpi.first.units.Units.Degree;
-        // Angle LIMELIGHT_MOUNTING_ANGLE = Degree.of(15);
-        Angle theta = ty.plus(Constants.Dimensions.limelightMountingAngle);
-        // import edu.wpi.first.units.Units.Radians;
-        double distance = opposite.in(Units.Meter) / Math.tan(theta.in(Units.Radians));
-        return Distance.ofBaseUnits(distance, Units.Meter);
+    public Distance getDistance() {
+        double distance = 0;
+        if (isTargetVisible()) {
+            // TARGET_HEIGHT needs to be defined as a Distance (in Inch)
+            // Distance TARGET_HEIGHT = Distance.ofBaseUnits(36, Inch)
+            Distance opposite = Constants.Dimensions.targetHeight.minus(Constants.Dimensions.limelightHeight);
+            // ty is from the limelight helper getTy()
+            Angle theta = ty.plus(Constants.Dimensions.limelightMountingAngle);
+            distance = opposite.in(Units.Inches) / Math.tan(theta.in(Units.Radians));
+        }
+        return Distance.ofBaseUnits(distance, Units.Inches);
     }
 
     public Angle getTargetAngle() {
@@ -167,7 +156,7 @@ public class TurretControl extends SubsystemBase {
         Distance distance = getDistance();
         Distance oppposite = distance.times(Math.tan(tx.in(Units.Radians))).plus(Constants.Dimensions.limelightXOffset);
         Distance adjacent = distance.plus(Constants.Dimensions.limelightYOffset);
-        return Units.Radians.of(Math.atan(oppposite.in(Units.Meter) / adjacent.in(Units.Meter)));
+        return Units.Radians.of(Math.atan(oppposite.in(Units.Inches) / adjacent.in(Units.Inches)));
     }
 
     public Angle getTurretFacingAngle() {

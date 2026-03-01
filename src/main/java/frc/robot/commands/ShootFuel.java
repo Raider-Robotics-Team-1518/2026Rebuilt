@@ -4,6 +4,9 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 
@@ -11,14 +14,30 @@ import frc.robot.RobotContainer;
 public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
 
-  private int shootSpeed = 0;
   private boolean isDone = false;
+  private int shootSpeed = 0;
+  private static final InterpolatingDoubleTreeMap kRegression = new InterpolatingDoubleTreeMap();
 
   public ShootFuel(int shootSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.shootSystem);
+    addRequirements(RobotContainer.shootSystem, RobotContainer.turretControl);
     this.shootSpeed = shootSpeed;
     //this.kickSpeed = kickSpeed;
+    {
+        // first value is distance to target in INCHES
+        // second parameter is the corresponding shooter RPMs
+        // we'll want a few known values to give the interpolator
+
+        // closest we can shoot
+        kRegression.put(36.0, 2000.0);
+        kRegression.put(72.0, 2500.0);
+        kRegression.put(120.0, 2500.0);
+        kRegression.put(150.0, 2500.0);
+        kRegression.put(180.0, 3000.0);
+        // farthest we can shoot
+        kRegression.put(240.0, 4000.0);
+    }
+
   }
 
   // Called when the command is initially scheduled.
@@ -28,8 +47,20 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Math.abs(shootSpeed) > 0) {
-      RobotContainer.shootSystem.setShooterSpeed(shootSpeed);
+    Distance distAsDistance = RobotContainer.turretControl.getDistance();
+    double distance = distAsDistance.in(Units.Inches);
+    double shooterSpeed = 0;
+    if (distance > 0) {
+      // if we get a distance value, it means we're seeing the target AprilTag
+      // so use the calculated distance to the hub
+      shooterSpeed = kRegression.get(distance);
+    } else {
+      // otherwise, use the shoot speed passed in since we're probably in the
+      // neutral zone shooting towards our alliance side
+      shooterSpeed = this.shootSpeed;
+    }
+    if (Math.abs(shooterSpeed) > 0) {
+      RobotContainer.shootSystem.setShooterSpeed((int) shooterSpeed);
       //RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
     } else {
       RobotContainer.shootSystem.stopShooter();

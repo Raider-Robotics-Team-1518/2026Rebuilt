@@ -16,7 +16,7 @@ public class RotateTurret extends Command {
 
   public RotateTurret(double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.turretSubsystem);
+    addRequirements(RobotContainer.turretControl);
     this.speed = speed;
   }
 
@@ -28,9 +28,9 @@ public class RotateTurret extends Command {
   @Override
   public void execute() {
     if (Math.abs(speed) > 0) {
-      RobotContainer.turretSubsystem.driveTurret(speed);
+      RobotContainer.turretControl.driveTurret(speed);
     } else {
-      RobotContainer.turretSubsystem.driveTurret(0);
+      RobotContainer.turretControl.driveTurret(0);
       isDone = true;
     }
   }
@@ -38,7 +38,7 @@ public class RotateTurret extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.turretSubsystem.driveTurret(0);
+    RobotContainer.turretControl.driveTurret(0);
   }
 
   // Returns true when the command should end.

@@ -9,22 +9,19 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.IntakeFuel;
 import frc.robot.commands.KickFuel;
-import frc.robot.commands.RotateTurret;
 import frc.robot.commands.ShootFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shoot;
-import frc.robot.subsystems.TurretSubsystem;
+// import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TurretControl;
 
 public class RobotContainer {
@@ -58,14 +55,14 @@ public class RobotContainer {
 
         public static Intake intakeSystem;
         public static Shoot shootSystem;
-        public static TurretControl turretSubsystem;
+        public static TurretControl turretControl;
 
         private boolean isTurretTracking = true;
 
         public RobotContainer() {
                 intakeSystem = new Intake();
                 shootSystem = new Shoot();
-                turretSubsystem = new TurretControl();
+                turretControl = new TurretControl();
                 configureBindings();
         }
 
@@ -136,23 +133,23 @@ public class RobotContainer {
                 // turretSubsystem.setVelocity(0)));
                 codriver.leftTrigger(0.1).whileTrue(
                                 Commands.startEnd(() -> {
-                                        turretSubsystem.setState(Constants.turretStates.MANUAL);
-                                        turretSubsystem.driveTurret(-codriver.getLeftTriggerAxis());
+                                        turretControl.setState(Constants.turretStates.MANUAL);
+                                        turretControl.driveTurret(-codriver.getLeftTriggerAxis());
                                 },
-                                                () -> turretSubsystem.driveTurret(0)));
+                                                () -> turretControl.driveTurret(0)));
 
                 codriver.rightTrigger(0.1).whileTrue(
                                 Commands.startEnd(() -> {
-                                        turretSubsystem.setState(Constants.turretStates.MANUAL);
-                                        turretSubsystem.driveTurret(codriver.getRightTriggerAxis() * 60);
+                                        turretControl.setState(Constants.turretStates.MANUAL);
+                                        turretControl.driveTurret(codriver.getRightTriggerAxis() * 60);
                                 },
-                                                () -> turretSubsystem.driveTurret(0)));
+                                                () -> turretControl.driveTurret(0)));
                 codriver.b().onTrue(Commands.runOnce(() -> {
                         if (isTurretTracking) {
-                                turretSubsystem.setState(Constants.turretStates.MANUAL);
+                                turretControl.setState(Constants.turretStates.HOME);
                                 isTurretTracking = false;
                         } else {
-                                turretSubsystem.setState(Constants.turretStates.TRACKING);
+                                turretControl.setState(Constants.turretStates.TRACKING);
                                 isTurretTracking = true;
                         }
                 })
