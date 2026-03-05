@@ -26,22 +26,24 @@ public final class Constants {
         public static final int kickerMotorID = 28;
         public static final int winchRightMotorID = 14;
         public static final int winchLeftMotorID = 29;
+        public static final int indexMotorID = 30;
     }
 
     public static final class Speeds {
-        public static final double intakeMotorSpeed = 0.5;
-        public static final double winchMotorIntakeSpeed = 0.3;
+        public static final double intakeMotorSpeed = 0.35;
+        public static final double winchMotorIntakeSpeed = 0.25;
         public static final int shootMotorSpeed = 4000;  //Initial testing 85 to 100 is fairly consistent
         public static final int kickMotorSpeed = 2500;  //Need to dial this in - very noisy
+        public static final double indexMotorSpeed = -0.5;
         public static final double neoRPM = 11710;
         public static final double turretMotorFactor = 0.75;
     }
 
     public static final class Dimensions {
-        public static final Distance limelightHeight = Distance.ofRelativeUnits(5, Inches);
-        public static final Angle limelightMountingAngle = Angle.ofRelativeUnits(0, Degrees);
+        public static final Distance limelightHeight = Distance.ofRelativeUnits(18, Inches);
+        public static final Angle limelightMountingAngle = Angle.ofRelativeUnits(-19, Degrees);
         public static final Distance limelightXOffset = Distance.ofRelativeUnits(0, Inches);
-        public static final Distance limelightYOffset = Distance.ofRelativeUnits(5, Inches);
-        public static final Distance targetHeight = Distance.ofRelativeUnits(72, Inches);
+        public static final Distance limelightYOffset = Distance.ofRelativeUnits(0, Inches);
+        public static final Distance targetHeight = Distance.ofRelativeUnits(44.25, Inches);
     }
 }

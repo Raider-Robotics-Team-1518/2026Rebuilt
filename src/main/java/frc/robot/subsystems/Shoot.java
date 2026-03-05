@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -42,6 +43,7 @@ public class Shoot extends SubsystemBase {
   private final double kDkick = 0.005;
   private final double kFkick = 0.0025;
 
+  private final TalonFX indexMotor;
 
   public Shoot() {
     kickerMotor = new SparkMax(Constants.Motors.kickerMotorID, MotorType.kBrushless);
@@ -69,6 +71,7 @@ public class Shoot extends SubsystemBase {
     kickerMotor.configure(kickerMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     m_kicker_controller = kickerMotor.getClosedLoopController();
 
+    indexMotor = new TalonFX(Constants.Motors.indexMotorID);
   }
 
   public void setShooterSpeed(int shooterVelocity) {
@@ -78,6 +81,7 @@ public class Shoot extends SubsystemBase {
 
   public void setKickerSpeed(int kickerVelocity) {
     m_kicker_controller.setSetpoint(Constants.Speeds.kickMotorSpeed, ControlType.kVelocity);
+    indexMotor.set(Constants.Speeds.indexMotorSpeed);
   }
 
   public void stopShooter() {
@@ -86,6 +90,7 @@ public class Shoot extends SubsystemBase {
 
   public void stopKicker() {
     kickerMotor.stopMotor();
+    indexMotor.stopMotor();
   }
   
   @Override

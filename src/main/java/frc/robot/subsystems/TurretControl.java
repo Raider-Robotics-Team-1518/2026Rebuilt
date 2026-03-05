@@ -56,7 +56,7 @@ public class TurretControl extends SubsystemBase {
         turretMotor = new SparkMax(Constants.Motors.turretMotorID, MotorType.kBrushless);
         SparkMaxConfig motorConfig = new SparkMaxConfig();
         motorConfig.idleMode(IdleMode.kBrake);
-        turretEncoder = turretMotor.getAlternateEncoder();
+        turretEncoder = turretMotor.getEncoder();
         m_controller = turretMotor.getClosedLoopController();
 
         motorConfig.softLimit

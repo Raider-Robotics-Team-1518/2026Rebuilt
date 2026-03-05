@@ -39,6 +39,8 @@ public class Intake extends SubsystemBase {
     rightWinchEncoder = winchMotorRight.getEncoder();
     rightWinchEncoder.setPosition(0);
 
+    winchMotorLeftConfig = new SparkMaxConfig();
+    winchMotorRightConfig = new SparkMaxConfig();
     winchMotorLeftConfig.idleMode(IdleMode.kBrake);
     winchMotorLeft.configure(winchMotorLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     winchMotorRightConfig.idleMode(IdleMode.kBrake);
@@ -82,6 +84,9 @@ public class Intake extends SubsystemBase {
     }
   }
 
+  public void stopWinch() {
+    winchMotorLeft.set(0);
+  }
 
   @Override
   public void periodic() {

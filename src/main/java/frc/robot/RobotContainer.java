@@ -16,7 +16,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.commands.IntakeFuel;
 import frc.robot.commands.KickFuel;
+import frc.robot.commands.ReleaseIntake;
+import frc.robot.commands.RetractIntake;
 import frc.robot.commands.ShootFuel;
+import frc.robot.commands.StopWinch;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
@@ -98,25 +101,25 @@ public class RobotContainer {
                 // Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
                 // Reset the field-centric heading on left bumper press.
-                driver.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+                codriver.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
                 // Intake
-                driver.x().whileTrue(new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
+                driver.rightTrigger(0.1).whileTrue(
+                        new IntakeFuel(Constants.Speeds.intakeMotorSpeed)).onFalse(new IntakeFuel(0));
 
                 // Shooter
 
-                driver.y().onTrue(Commands.sequence(
-                        new ShootFuel(Constants.Speeds.shootMotorSpeed),
-                        Commands.waitSeconds(0.5),
-                        new KickFuel(Constants.Speeds.kickMotorSpeed)))
-                        .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0)));
+                codriver.rightBumper().onTrue(Commands.sequence(
+                                new ShootFuel(Constants.Speeds.shootMotorSpeed),
+                                Commands.waitSeconds(0.5),
+                                new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                                .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0)));
 
                 /*
                  * driver.y().whileTrue(new
-                 * ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
-                 * driver.a().whileTrue(new
-                 * KickFuel(Constants.Speeds.kickMotorSpeed)).onFalse(new KickFuel(0));
-                 */
+                 * ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0)); */
+                driver.x().whileTrue(new RetractIntake()).onFalse(new StopWinch());
+                driver.y().whileTrue(new ReleaseIntake()).onFalse(new StopWinch());
                 // THIS COMMENTED OUT CODE RELIES ON THE TurretSubsystem.java CLASS WHICH IS
                 // NOT WHAT'S INSTANTIATED ABOVE. YOU'LL NEED TO CHANGE THAT TO GO WITH THIS
                 // CODE
@@ -152,9 +155,7 @@ public class RobotContainer {
                                 turretControl.setState(Constants.turretStates.TRACKING);
                                 isTurretTracking = true;
                         }
-                })
-                );
-
+                }));
 
                 drivetrain.registerTelemetry(logger::telemeterize);
         }
