@@ -4,21 +4,17 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RotateTurret extends Command {
-  /** Creates a new RotateTurret. */
-
-  private double speed = 0;
+public class DriveIntakeOut extends Command {
   private boolean isDone = false;
-
-  public RotateTurret(double speed) {
+  private double speed = 0;
+  /** Creates a new DriveIntakeOut. */
+  public DriveIntakeOut(double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.turretControl);
+    addRequirements(RobotContainer.intakeSystem);
     this.speed = speed;
   }
 
@@ -29,22 +25,16 @@ public class RotateTurret extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    RobotContainer.turretControl.setStateDirectly(Constants.turretStates.MANUAL);
-    if (Math.abs(speed) > 0) {
-      SmartDashboard.putBoolean("Rotate Turret", true);
-      RobotContainer.turretControl.driveTurret(speed);
-    } else {
-      SmartDashboard.putBoolean("Rotate Turret", false);
-      RobotContainer.turretControl.driveTurret(0);
-      // isDone = true;
-    }
+    RobotContainer.intakeSystem.releaseWinchMotors();
+    RobotContainer.intakeSystem.driveIntakeOut();
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    RobotContainer.turretControl.setStateDirectly(Constants.turretStates.MANUAL);
-    RobotContainer.turretControl.driveTurret(0);
+    RobotContainer.intakeSystem.stopWinch();
+    isDone = true;
   }
 
   // Returns true when the command should end.

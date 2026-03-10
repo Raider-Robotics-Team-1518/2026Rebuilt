@@ -69,6 +69,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        // RobotContainer.intakeSystem.releaseWinchMotors();
         m_autonomousCommand = autoChooser.getSelected();
 
         if (m_autonomousCommand != null) {

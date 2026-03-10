@@ -84,12 +84,20 @@ public class Shoot extends SubsystemBase {
     indexMotor.set(Constants.Speeds.indexMotorSpeed);
   }
 
+  public void setUnjamSpeed() {
+    indexMotor.set(-Constants.Speeds.indexMotorSpeed);
+  }
+
   public void stopShooter() {
     shootMotor.stopMotor();
   }
 
   public void stopKicker() {
     kickerMotor.stopMotor();
+    indexMotor.stopMotor();
+  }
+
+  public void stopUnjam() {
     indexMotor.stopMotor();
   }
   

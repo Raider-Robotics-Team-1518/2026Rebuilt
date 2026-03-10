@@ -30,13 +30,14 @@ public final class Constants {
     }
 
     public static final class Speeds {
-        public static final double intakeMotorSpeed = 0.35;
-        public static final double winchMotorIntakeSpeed = 0.25;
-        public static final int shootMotorSpeed = 4000;  //Initial testing 85 to 100 is fairly consistent
-        public static final int kickMotorSpeed = 2500;  //Need to dial this in - very noisy
+        public static final double intakeMotorSpeed = 0.6;
+        public static final double winchMotorIntakeSpeed = 0.35;
+        public static final int shootMotorSpeed = 4000;
+        public static final int kickMotorSpeed = 2700;
+        public static final int backKickMotorSpeed = -2500;
         public static final double indexMotorSpeed = -0.5;
         public static final double neoRPM = 11710;
-        public static final double turretMotorFactor = 0.75;
+        public static final double turretMotorFactor = 0.5;
     }
 
     public static final class Dimensions {

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.units.Units;
 import frc.robot.LimelightHelpers;
 import frc.robot.Utils;
@@ -27,25 +28,22 @@ import frc.robot.Constants;
 public class TurretControl extends SubsystemBase {
 
     // these are the AprilTags on the hubs that we'll target; we'll ignore any others when shooting
-    private final int[] redAprilTags = {2, 5, 8, 9, 10, 11};
-    private final int[] blueAprilTags = {18, 21, 24, 25, 26, 27};
+    private final int[] redAprilTags = {8, 10, 11};
+    private final int[] blueAprilTags = {18, 24, 26, 27};
 
     private final SparkMax turretMotor;
     private final RelativeEncoder turretEncoder;
     SparkClosedLoopController m_controller;
 
-    private final double forwardSoftLimit = 2; // max angle in radians
-    private final double reverseSoftLimit = -2; // min angle in radians
+    private final double forwardSoftLimit = 2.1; // max angle in radians
+    private final double reverseSoftLimit = -2.1; // min angle in radians
 
     private final double gearRatio = 90;
-    private final double kP = 1;
+    private final double kP = 0.2;
     private final double kI = 0;
     private final double kD = 0;
+    private final double kS = 0.1;
 
-    // This enum should be moved to its own class and imported
-    // and used here so that it's easily available in the
-    // RobotContainer.java file
-    
     private Constants.turretStates currentState;
     private Angle tx, ty;
     private Boolean tv;
@@ -67,7 +65,8 @@ public class TurretControl extends SubsystemBase {
 
         motorConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .pid(kP, kI, kD, ClosedLoopSlot.kSlot0);
+            .pid(kP, kI, kD, ClosedLoopSlot.kSlot0)
+            .feedForward.kS(kS);
 
         // Configure Encoder Gear Ratio
         motorConfig.encoder
@@ -94,14 +93,14 @@ public class TurretControl extends SubsystemBase {
          * We could switch based on the Alliance we're on
          */
         if (Utils.isRed()) {
-            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", redAprilTags);
+            LimelightHelpers.SetFiducialIDFiltersOverride("", redAprilTags);
         } else {
-            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", blueAprilTags);
+            LimelightHelpers.SetFiducialIDFiltersOverride("", blueAprilTags);
         }
 
-        tx = Units.Degrees.of(LimelightHelpers.getTX("limelight"));
-        ty = Units.Degrees.of(LimelightHelpers.getTY("limelight"));
-        tv = LimelightHelpers.getTV("limelight");
+        tx = Units.Degrees.of(LimelightHelpers.getTX(""));
+        ty = Units.Degrees.of(LimelightHelpers.getTY(""));
+        tv = LimelightHelpers.getTV("");
 
         // This method will be called once per scheduler run
         // DEFAULT, HOME, TRACKING, SEARCHING, MANUAL
@@ -128,15 +127,19 @@ public class TurretControl extends SubsystemBase {
             default:
                 stopMotor();
         }
+        SmartDashboard.putString("Turret Mode", currentState.name());
+        SmartDashboard.putBoolean("Target Visible", tv);
     }
 
     public Command setState(Constants.turretStates state) {
-        // the `this` is supply the requirements, in place of doing
-        // and addRequirements() in a normal command
         return new InstantCommand(() -> currentState = state, this);
     }
 
-    public Distance getDistance() {
+    public void setStateDirectly(Constants.turretStates state) {
+        this.currentState = state;
+    }
+
+    public double getDistanceAsDouble() {
         double distance = 0;
         if (isTargetVisible()) {
             // TARGET_HEIGHT needs to be defined as a Distance (in Inch)
@@ -146,6 +149,11 @@ public class TurretControl extends SubsystemBase {
             Angle theta = ty.plus(Constants.Dimensions.limelightMountingAngle);
             distance = opposite.in(Units.Inches) / Math.tan(theta.in(Units.Radians));
         }
+        SmartDashboard.putNumber("Hub Distance", distance);
+        return distance;
+    }
+    public Distance getDistance() {
+        double distance = getDistanceAsDouble();
         return Distance.ofBaseUnits(distance, Units.Inches);
     }
 
@@ -176,21 +184,25 @@ public class TurretControl extends SubsystemBase {
         Angle offsetAngle = getTargetAngle();
         Angle targetAngle = currentAngle.plus(offsetAngle);
         Angle clampedAngle = Units.Rotations.of(Math.max(-0.48, Math.min(0.48, targetAngle.in(Rotations))));
+        SmartDashboard.putNumber("ClampedAngle", clampedAngle.baseUnitMagnitude());
         // Set the setpoint of the PID controller in raw position mode
         m_controller.setSetpoint(clampedAngle.baseUnitMagnitude(), ControlType.kPosition);
     }
 
     private void findTarget() {
         double currentRotation = getTurretFacingAngle().in(Units.Rotations);
+        SmartDashboard.putNumber("current rotation", currentRotation);
         double searchSpeed = 0.26; // radians/sec
-        if (currentRotation >= 0.47) {
-            searchDirectionRight = false;
-        } else if (currentRotation <= 0.49) {
+        if (currentRotation >= 0.35) {
             searchDirectionRight = true;
+        } else if (currentRotation < 0.35) {
+            searchDirectionRight = false;
         }
 
         double finalVelocity = searchDirectionRight ? searchSpeed : -searchSpeed;
+        finalVelocity=finalVelocity*500;
         m_controller.setSetpoint(finalVelocity, ControlType.kVelocity);
+        SmartDashboard.putNumber("finalVelocity", finalVelocity);
                                                                                     // deg/sec
     }
 
@@ -208,7 +220,11 @@ public class TurretControl extends SubsystemBase {
     * @param speed Trigger input in range from +- 0 to 1
      */    
     public void driveTurret (double speed) {
+        double currentRotation = getTurretFacingAngle().in(Units.Rotations);
         int motorSpeed = (int) (Constants.Speeds.neoRPM * Constants.Speeds.turretMotorFactor * speed);
-        m_controller.setSetpoint (motorSpeed, ControlType.kVelocity);
+        SmartDashboard.putNumber("Turret Rotate Speed", motorSpeed);
+        if (currentRotation <= 0.46 && currentRotation >=-0.46){
+            m_controller.setSetpoint (motorSpeed, ControlType.kVelocity);
+        }
     }
 }

@@ -13,9 +13,10 @@ public class RetractIntake extends Command {
   private boolean isDone = false;
   private double speed = 0;
   /** Creates a new RetractIntake. */
-  public RetractIntake() {
+  public RetractIntake(double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.intakeSystem);
+    this.speed = speed;
   }
 
   // Called when the command is initially scheduled.

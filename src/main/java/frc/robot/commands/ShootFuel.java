@@ -47,8 +47,7 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Distance distAsDistance = RobotContainer.turretControl.getDistance();
-    double distance = distAsDistance.in(Units.Inches);
+    double distance = RobotContainer.turretControl.getDistanceAsDouble();
     double shooterSpeed = 0;
     if (distance > 0) {
       // if we get a distance value, it means we're seeing the target AprilTag
