@@ -46,8 +46,8 @@ public class Intake extends SubsystemBase {
     winchMotorLeftConfig.inverted(true);
     winchMotorLeft.configure(winchMotorLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     winchMotorRightConfig.idleMode(IdleMode.kBrake);
-    winchMotorRightConfig.inverted(false);
-    winchMotorRightConfig.follow(winchMotorLeft);
+    //winchMotorRightConfig.inverted(false);
+    winchMotorRightConfig.follow(winchMotorLeft, true);
     winchMotorRight.configure(winchMotorRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
@@ -61,28 +61,28 @@ public class Intake extends SubsystemBase {
 
   public void releaseWinchMotors() {
     winchMotorLeftConfig.idleMode(IdleMode.kCoast);
-    winchMotorLeftConfig.inverted(true);
+    //winchMotorLeftConfig.inverted(true);
     winchMotorLeft.configureAsync(winchMotorLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     winchMotorRightConfig.idleMode(IdleMode.kCoast);
-    winchMotorRightConfig.inverted(false);
-    winchMotorRightConfig.follow(winchMotorLeft);
+    //winchMotorRightConfig.inverted(true);
+    //winchMotorRightConfig.follow(winchMotorLeft);
     winchMotorRight.configureAsync(winchMotorRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   public void brakeWinchMotors() {
     winchMotorLeftConfig.idleMode(IdleMode.kBrake);
-    winchMotorLeftConfig.inverted(true);
+   // winchMotorLeftConfig.inverted(true);
     winchMotorLeft.configureAsync(winchMotorLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     winchMotorRightConfig.idleMode(IdleMode.kBrake);
-    winchMotorRightConfig.inverted(false);
-    winchMotorRightConfig.follow(winchMotorLeft);
+    //winchMotorRightConfig.inverted(true);
+    //winchMotorRightConfig.follow(winchMotorLeft);
     winchMotorRight.configureAsync(winchMotorRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   public void retractIntake() {
     // because the right winch motor is a follower, we don't need to set its speed here
-    if (leftWinchEncoder.getPosition() > 10) {
-      winchMotorLeft.set(Constants.Speeds.winchMotorIntakeSpeed);
+    if (leftWinchEncoder.getPosition() > 3) {
+      winchMotorLeft.set(-Constants.Speeds.winchMotorIntakeSpeed);
     }  else {
       winchMotorLeft.stopMotor();
     }
@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase {
   public void driveIntakeOut() {
     SmartDashboard.putNumber("left winch encoder", leftWinchEncoder.getPosition());
     // because the right winch motor is a follower, we don't need to set its speed here
-    if (leftWinchEncoder.getPosition() < 40000) {
+    if (leftWinchEncoder.getPosition() < 43) {
       winchMotorLeft.set(Constants.Speeds.winchMotorIntakeSpeed);
     }  else {
       winchMotorLeft.stopMotor();
@@ -99,7 +99,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void stopWinch() {
-    winchMotorLeft.set(0);
+    winchMotorLeft.stopMotor();
   }
 
   @Override

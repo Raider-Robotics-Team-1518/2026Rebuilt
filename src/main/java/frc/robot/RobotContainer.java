@@ -133,21 +133,19 @@ public class RobotContainer {
                 // RotateTurret(codriver.getRightTriggerAxis()))
                 // .onFalse(new RotateTurret(0));
 
-                codriver.leftTrigger(0.1).whileTrue(
-                                Commands.repeatingSequence(
+                codriver.leftTrigger(0.1).onChange(
+                                Commands.sequence(
                                                 turretControl.setState(Constants.turretStates.MANUAL),
                                                 new InstantCommand(() -> {
                                                         turretControl.driveTurret(-codriver.getLeftTriggerAxis());
-                                                })))
-                                .onFalse(new RotateTurret(0));
+                                                })));
 
-                codriver.rightTrigger(0.1).whileTrue(
-                                Commands.repeatingSequence(
+                codriver.rightTrigger(0.1).onChange(
+                                Commands.sequence(
                                                 turretControl.setState(Constants.turretStates.MANUAL),
                                                 new InstantCommand(() -> {
                                                         turretControl.driveTurret(codriver.getRightTriggerAxis());
-                                                })))
-                                .onFalse(new RotateTurret(0));
+                                                })));
 
                 codriver.b().onTrue(Commands.runOnce(() -> {
                         if (isTurretTracking) {

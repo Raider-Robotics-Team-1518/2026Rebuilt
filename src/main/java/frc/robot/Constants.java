@@ -16,7 +16,7 @@ public final class Constants {
         DEFAULT, HOME, TRACKING, SEARCHING, MANUAL
     }
 
-    public static final double turretMotorDegreesPerRotation = 90;
+    public static final double turretMotorDegreesPerRotation = 900;
 
     public static final class Motors {
         public static final int intakeMotorID = 24;
@@ -30,19 +30,19 @@ public final class Constants {
     }
 
     public static final class Speeds {
-        public static final double intakeMotorSpeed = 0.6;
+        public static final double intakeMotorSpeed = 1;
         public static final double winchMotorIntakeSpeed = 0.35;
-        public static final int shootMotorSpeed = 4000;
+        public static final double shootMotorSpeed = 0.55;
         public static final int kickMotorSpeed = 2700;
         public static final int backKickMotorSpeed = -2500;
         public static final double indexMotorSpeed = -0.5;
         public static final double neoRPM = 11710;
-        public static final double turretMotorFactor = 0.5;
+        public static final double turretMotorFactor = 0.0001;
     }
 
     public static final class Dimensions {
         public static final Distance limelightHeight = Distance.ofRelativeUnits(18, Inches);
-        public static final Angle limelightMountingAngle = Angle.ofRelativeUnits(-19, Degrees);
+        public static final Angle limelightMountingAngle = Angle.ofRelativeUnits(0, Degrees);
         public static final Distance limelightXOffset = Distance.ofRelativeUnits(0, Inches);
         public static final Distance limelightYOffset = Distance.ofRelativeUnits(0, Inches);
         public static final Distance targetHeight = Distance.ofRelativeUnits(44.25, Inches);

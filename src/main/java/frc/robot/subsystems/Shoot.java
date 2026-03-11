@@ -27,11 +27,10 @@ public class Shoot extends SubsystemBase {
   private final SparkMax shootMotor = new SparkMax(Constants.Motors.shootMotorID, MotorType.kBrushless);
   private final SparkClosedLoopController m_shoot_controller;
   private final SparkMaxConfig shootMotorConfig;
-  private final RelativeEncoder shootEncoder;
-  private final double kPshoot = 0.00002;
+  private final double kPshoot = 0.000025;
   private final double kIshoot = 0;
   private final double kDshoot = 0.001;
-  private final double kFshoot = 7.55;
+  private final double kFshoot = 0.0025;
 
 
   // kick motor
@@ -48,7 +47,6 @@ public class Shoot extends SubsystemBase {
   public Shoot() {
     kickerMotor = new SparkMax(Constants.Motors.kickerMotorID, MotorType.kBrushless);
     m_shoot_controller = shootMotor.getClosedLoopController();
-    shootEncoder = shootMotor.getEncoder();
     shootMotorConfig = new SparkMaxConfig();
     shootMotorConfig.idleMode(IdleMode.kCoast);
     shootMotorConfig.inverted(false);
@@ -74,9 +72,9 @@ public class Shoot extends SubsystemBase {
     indexMotor = new TalonFX(Constants.Motors.indexMotorID);
   }
 
-  public void setShooterSpeed(int shooterVelocity) {
-    shoot_velocity = shooterVelocity; // in RPMs
-    m_shoot_controller.setSetpoint(shoot_velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+  public void setShooterSpeed(double shooterVelocity) {
+    shoot_velocity = shooterVelocity; // in DutyCycle
+    m_shoot_controller.setSetpoint(shoot_velocity, ControlType.kDutyCycle, ClosedLoopSlot.kSlot0);
   }
 
   public void setKickerSpeed(int kickerVelocity) {

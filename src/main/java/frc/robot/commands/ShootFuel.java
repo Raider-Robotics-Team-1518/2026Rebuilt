@@ -8,6 +8,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -15,20 +16,20 @@ public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
 
   private boolean isDone = false;
-  private int shootSpeed = 0;
+  private double shootSpeed = 0;
   private static final InterpolatingDoubleTreeMap kRegression = new InterpolatingDoubleTreeMap();
 
-  public ShootFuel(int shootSpeed) {
+  public ShootFuel(double shootSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.shootSystem, RobotContainer.turretControl);
     this.shootSpeed = shootSpeed;
-    //this.kickSpeed = kickSpeed;
     {
         // first value is distance to target in INCHES
         // second parameter is the corresponding shooter RPMs
         // we'll want a few known values to give the interpolator
 
         // closest we can shoot
+        kRegression.put(0.0, 0.0);
         kRegression.put(36.0, 2000.0);
         kRegression.put(72.0, 2500.0);
         kRegression.put(120.0, 2500.0);
@@ -47,23 +48,23 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    //Distance distAsDistance = RobotContainer.turretControl.getDistance();
     double distance = RobotContainer.turretControl.getDistanceAsDouble();
     double shooterSpeed = 0;
     if (distance > 0) {
       // if we get a distance value, it means we're seeing the target AprilTag
       // so use the calculated distance to the hub
-      shooterSpeed = kRegression.get(distance);
+      //shooterSpeed = kRegression.get(distance);
+      shooterSpeed = this.shootSpeed * (distance / 192);
     } else {
       // otherwise, use the shoot speed passed in since we're probably in the
       // neutral zone shooting towards our alliance side
       shooterSpeed = this.shootSpeed;
     }
     if (Math.abs(shooterSpeed) > 0) {
-      RobotContainer.shootSystem.setShooterSpeed((int) shooterSpeed);
-      //RobotContainer.shootSystem.setKickerSpeed(kickSpeed);
+      RobotContainer.shootSystem.setShooterSpeed(shooterSpeed);
     } else {
       RobotContainer.shootSystem.stopShooter();
-      //RobotContainer.shootSystem.stopKicker();
     }
     isDone = true;
   }

@@ -35,14 +35,20 @@ public class TurretControl extends SubsystemBase {
     private final RelativeEncoder turretEncoder;
     SparkClosedLoopController m_controller;
 
-    private final double forwardSoftLimit = 2.1; // max angle in radians
-    private final double reverseSoftLimit = -2.1; // min angle in radians
+    private final double forwardSoftLimit = 0.2; // max angle in radians
+    private final double reverseSoftLimit = -0.2; // min angle in radians
 
     private final double gearRatio = 90;
     private final double kP = 0.2;
     private final double kI = 0;
     private final double kD = 0;
     private final double kS = 0.1;
+
+    // PID for running turret to angle position
+    private final double kP1 = 0.000001;
+    private final double kI1 = 0;
+    private final double kD1 = 0.05;
+    private final double kS1 = 0.0;
 
     private Constants.turretStates currentState;
     private Angle tx, ty;
@@ -66,7 +72,8 @@ public class TurretControl extends SubsystemBase {
         motorConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .pid(kP, kI, kD, ClosedLoopSlot.kSlot0)
-            .feedForward.kS(kS);
+            .pid(kP1, kI1, kD1, ClosedLoopSlot.kSlot1)
+            .feedForward.kS(kS, ClosedLoopSlot.kSlot0).kS(kS1, ClosedLoopSlot.kSlot1);
 
         // Configure Encoder Gear Ratio
         motorConfig.encoder
@@ -74,11 +81,9 @@ public class TurretControl extends SubsystemBase {
             .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
 
         turretMotor.configure(
-            motorConfig,
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
+            motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters
         );
-
+        
         // Reset encoder position to zero
         turretEncoder.setPosition(0);
     }
@@ -110,12 +115,12 @@ public class TurretControl extends SubsystemBase {
                 break;
             case TRACKING:
                 trackTarget();
-                if (!isTargetVisible()) {
-                    currentState = Constants.turretStates.SEARCHING;
-                }
+                // if (!isTargetVisible()) {
+                //     currentState = Constants.turretStates.SEARCHING;
+                // }
                 break;
             case SEARCHING:
-                findTarget();
+                // findTarget();
                 if (isTargetVisible()) {
                     currentState = Constants.turretStates.TRACKING;
                 }
@@ -129,6 +134,7 @@ public class TurretControl extends SubsystemBase {
         }
         SmartDashboard.putString("Turret Mode", currentState.name());
         SmartDashboard.putBoolean("Target Visible", tv);
+        SmartDashboard.putNumber("TurretLimit", turretEncoder.getPosition());
     }
 
     public Command setState(Constants.turretStates state) {
@@ -180,13 +186,21 @@ public class TurretControl extends SubsystemBase {
 
     private void trackTarget() {
         // uses PID to drive tx to 0
+        double power = 0;
         Angle currentAngle = getTurretFacingAngle();
         Angle offsetAngle = getTargetAngle();
         Angle targetAngle = currentAngle.plus(offsetAngle);
         Angle clampedAngle = Units.Rotations.of(Math.max(-0.48, Math.min(0.48, targetAngle.in(Rotations))));
         SmartDashboard.putNumber("ClampedAngle", clampedAngle.baseUnitMagnitude());
         // Set the setpoint of the PID controller in raw position mode
-        m_controller.setSetpoint(clampedAngle.baseUnitMagnitude(), ControlType.kPosition);
+        //m_controller.setSetpoint(clampedAngle.baseUnitMagnitude(), ControlType.kPosition, ClosedLoopSlot.kSlot1);
+        if(Math.abs(clampedAngle.baseUnitMagnitude()) > 0.02){
+            power = 0.85 * clampedAngle.baseUnitMagnitude(); //(0.5 * (1 - (targetAngle.div(offsetAngle)).baseUnitMagnitude()));
+        }
+        else {
+            power = 0;
+        }
+        m_controller.setSetpoint(power, ControlType.kDutyCycle, ClosedLoopSlot.kSlot1);
     }
 
     private void findTarget() {
@@ -200,8 +214,7 @@ public class TurretControl extends SubsystemBase {
         }
 
         double finalVelocity = searchDirectionRight ? searchSpeed : -searchSpeed;
-        finalVelocity=finalVelocity*500;
-        m_controller.setSetpoint(finalVelocity, ControlType.kVelocity);
+        m_controller.setSetpoint(finalVelocity, ControlType.kDutyCycle);
         SmartDashboard.putNumber("finalVelocity", finalVelocity);
                                                                                     // deg/sec
     }
@@ -224,7 +237,8 @@ public class TurretControl extends SubsystemBase {
         int motorSpeed = (int) (Constants.Speeds.neoRPM * Constants.Speeds.turretMotorFactor * speed);
         SmartDashboard.putNumber("Turret Rotate Speed", motorSpeed);
         if (currentRotation <= 0.46 && currentRotation >=-0.46){
-            m_controller.setSetpoint (motorSpeed, ControlType.kVelocity);
+            //m_controller.setSetpoint (motorSpeed, ControlType.kVelocity);
+            m_controller.setSetpoint(speed * 0.25, ControlType.kDutyCycle, ClosedLoopSlot.kSlot0);
         }
     }
 }
