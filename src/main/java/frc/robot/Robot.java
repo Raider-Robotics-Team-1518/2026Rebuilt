@@ -38,9 +38,9 @@ public class Robot extends TimedRobot {
         autos = new Autos(this);
 
         // add options to the dashboard
-        autoChooser.addOption("Drive8_Test", autos.Drive8_Test());
-        autoChooser.addOption("LeaveHome", autos.example());
-        autoChooser.addOption("Test_45", autos.Test_45Command());
+        autoChooser.addOption("Drive_Out_Right", autos.drive_Out_RightCommand());
+        autoChooser.addOption("Drive_Out_Left", autos.drive_Out_LeftCommand());
+        autoChooser.addOption("Drive_Out_Middle", autos.drive_Out_MiddleCommand());
         autoChooser.addOption("ScorePre_GoDepot", autos.ScorePre_GoDepotCommand());
         SmartDashboard.putData("Select Auto", autoChooser);
     }

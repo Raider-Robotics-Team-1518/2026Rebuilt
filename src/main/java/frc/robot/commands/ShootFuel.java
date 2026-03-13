@@ -55,7 +55,9 @@ public class ShootFuel extends Command {
       // if we get a distance value, it means we're seeing the target AprilTag
       // so use the calculated distance to the hub
       //shooterSpeed = kRegression.get(distance);
-      shooterSpeed = this.shootSpeed * (distance / 192);
+      
+      shooterSpeed = this.shootSpeed*0.002*(distance)+0.35; 
+      //0.002 = 0.0013/this.shootSpeed
     } else {
       // otherwise, use the shoot speed passed in since we're probably in the
       // neutral zone shooting towards our alliance side

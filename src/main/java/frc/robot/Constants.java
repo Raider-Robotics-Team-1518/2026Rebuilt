@@ -32,7 +32,7 @@ public final class Constants {
     public static final class Speeds {
         public static final double intakeMotorSpeed = 1;
         public static final double winchMotorIntakeSpeed = 0.35;
-        public static final double shootMotorSpeed = 0.55;
+        public static final double shootMotorSpeed = 0.65;
         public static final int kickMotorSpeed = 2700;
         public static final int backKickMotorSpeed = -2500;
         public static final double indexMotorSpeed = -0.5;
