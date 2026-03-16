@@ -6,6 +6,7 @@ import java.util.Optional;
 import choreo.auto.AutoFactory;
 import frc.robot.commands.DriveIntakeOut;
 import frc.robot.commands.KickFuel;
+import frc.robot.commands.RetractIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import choreo.auto.AutoRoutine;
@@ -75,10 +76,16 @@ public class Autos {
                                                                                 robotContainer.turretControl.setState(
                                                                                                 Constants.turretStates.TRACKING),
                                                                                 Commands.race(new DriveIntakeOut(100),
-                                                                                Commands.waitSeconds(0.5)),
+                                                                                Commands.waitSeconds(0.25)),
                                                                                 Commands.race(new KickFuel(
                                                                                                 Constants.Speeds.kickMotorSpeed)),
-                                                                                Commands.waitSeconds(10)))
+                                                                                Commands.waitSeconds(5)))
+                                                .andThen(
+                                                                Commands.parallel(
+                                                                                Commands.race(
+                                                                                                new RetractIntake(100),
+                                                                                                Commands.waitSeconds(0.25)),
+                                                                                Commands.waitSeconds(5)))
                                                 .andThen(
                                                                 Commands.parallel(
                                                                                 Commands.race(
@@ -121,10 +128,16 @@ public class Autos {
                                                                                 robotContainer.turretControl.setState(
                                                                                                 Constants.turretStates.TRACKING),
                                                                                 Commands.race(new DriveIntakeOut(100),
-                                                                                Commands.waitSeconds(0.5)),
+                                                                                Commands.waitSeconds(0.25)),
                                                                                 Commands.race(new KickFuel(
                                                                                                 Constants.Speeds.kickMotorSpeed)),
-                                                                                Commands.waitSeconds(10)))
+                                                                                Commands.waitSeconds(5)))
+                                                .andThen(
+                                                                Commands.parallel(
+                                                                                Commands.race(
+                                                                                                new RetractIntake(100),
+                                                                                                Commands.waitSeconds(0.25)),
+                                                                                Commands.waitSeconds(5)))
                                                 .andThen(
                                                                 Commands.parallel(
                                                                                 Commands.race(
@@ -167,10 +180,16 @@ public class Autos {
                                                                                 robotContainer.turretControl.setState(
                                                                                                 Constants.turretStates.TRACKING),
                                                                                 Commands.race(new DriveIntakeOut(100),
-                                                                                Commands.waitSeconds(0.5)),
+                                                                                Commands.waitSeconds(0.25)),
                                                                                 Commands.race(new KickFuel(
                                                                                                 Constants.Speeds.kickMotorSpeed)),
-                                                                                Commands.waitSeconds(10)))
+                                                                                Commands.waitSeconds(5)))
+                                                .andThen(
+                                                                Commands.parallel(
+                                                                                Commands.race(
+                                                                                                new RetractIntake(100),
+                                                                                                Commands.waitSeconds(0.25)),
+                                                                                Commands.waitSeconds(5)))
                                                 .andThen(
                                                                 Commands.parallel(
                                                                                 Commands.race(
