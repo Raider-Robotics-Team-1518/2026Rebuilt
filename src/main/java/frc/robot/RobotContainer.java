@@ -113,10 +113,13 @@ public class RobotContainer {
 
                 // Shooter
 
-                driver.y().onTrue(Commands.sequence(
+                driver.y().onTrue(Commands.parallel(Commands.sequence(
                                 new ShootFuel(Constants.Speeds.shootMotorSpeed),
                                 Commands.waitSeconds(0.5),
-                                new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                                new KickFuel(Constants.Speeds.kickMotorSpeed)),
+                                Commands.sequence(Commands.race(new RetractIntake(100), Commands.waitSeconds(1)),
+                                                Commands.race(new DriveIntakeOut(100), Commands.waitSeconds(1)))
+                                                .repeatedly()))
                                 .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0)));
 
                 /*
@@ -158,10 +161,13 @@ public class RobotContainer {
                         }
                 }));
 
-                codriver.y().onTrue(Commands.sequence(
+                codriver.y().onTrue(Commands.parallel(Commands.sequence(
                                 new ShootFuel(Constants.Speeds.shootMotorSpeed),
                                 Commands.waitSeconds(0.5),
-                                new KickFuel(Constants.Speeds.kickMotorSpeed)))
+                                new KickFuel(Constants.Speeds.kickMotorSpeed)),
+                                Commands.sequence(Commands.race(new RetractIntake(100), Commands.waitSeconds(1)),
+                                                Commands.race(new DriveIntakeOut(100), Commands.waitSeconds(1)))
+                                                .repeatedly()))
                                 .onFalse(Commands.sequence(new KickFuel(0), new ShootFuel(0)));
 
                 codriver.x().onTrue(

@@ -28,7 +28,7 @@ import frc.robot.Constants;
 public class TurretControl extends SubsystemBase {
 
     // these are the AprilTags on the hubs that we'll target; we'll ignore any others when shooting
-    private final int[] redAprilTags = {18, 8, 10, 11};
+    private final int[] redAprilTags = {8, 10, 11};
     private final int[] blueAprilTags = {24, 26, 27};
 
     private final SparkMax turretMotor;
