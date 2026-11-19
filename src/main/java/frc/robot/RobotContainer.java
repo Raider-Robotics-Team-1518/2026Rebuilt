@@ -126,7 +126,9 @@ public class RobotContainer {
                  * driver.y().whileTrue(new
                  * ShootFuel(Constants.Speeds.shootMotorSpeed)).onFalse(new ShootFuel(0));
                  */
-                driver.a().whileTrue(new RetractIntake(100)).onFalse(new StopWinch());
+                driver.a().whileTrue(
+                                new RetractIntake(100))
+                                .onFalse(new StopWinch());
                 driver.b().whileTrue(new ReleaseIntake()).onFalse(new StopWinch());
                 driver.x().whileTrue(new DriveIntakeOut(100)).onFalse(new StopWinch());
 
